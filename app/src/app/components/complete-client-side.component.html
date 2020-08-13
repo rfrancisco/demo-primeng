@@ -1,0 +1,150 @@
+<p-table #dt
+    [value]="customers"
+    [dataKey]="'id'"
+    [sortField]="'id'"
+    [rows]="50"
+    [rowHover]="true"
+    [totalRecords]="totalRecords"
+    [filterDelay]="500"
+    [globalFilterFields]="['name','company','country.name','representative.name','status']"
+    [scrollable]="true"
+    [scrollHeight]="'flex'"
+    [loading]="false"
+    [paginator]="showPaginator"
+    [showCurrentPageReport]="true" 
+    [currentPageReportTemplate]="loading ? 'Loading...' : 'Showing {first} to {last} of {totalRecords} entries'"
+    [rowsPerPageOptions]="[10,25,50,100]"
+
+    [editMode]="'row'"
+    [selectionMode]="'single'"
+    [(selection)]="selectedCustomer">
+    <ng-template pTemplate="caption">
+        <div class="table-header">
+            Complete List of Customers ({{loading ? '...' : totalRecords}})
+            <div>
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+                </span>
+                &nbsp;
+                <p-toggleButton [(ngModel)]="showPaginator" [onLabel]="'Use infinite scroll'" [offLabel]="'Use paginator'"></p-toggleButton>
+            </div>
+        </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+        <tr>
+            <th pSortableColumn="id">Id <p-sortIcon field="id"></p-sortIcon></th>
+            <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+            <th pSortableColumn="company">Company <p-sortIcon field="company"></p-sortIcon></th>
+            <th pSortableColumn="country.name">Country <p-sortIcon field="country.name"></p-sortIcon></th>
+            <th pSortableColumn="representative.name">Representative <p-sortIcon field="representative.name"></p-sortIcon></th>
+            <th pSortableColumn="date">Date <p-sortIcon field="date"></p-sortIcon></th>
+            <th pSortableColumn="status">Status <p-sortIcon field="status"></p-sortIcon></th>
+            <th pSortableColumn="activity">Activity <p-sortIcon field="activity"></p-sortIcon></th>
+            <th></th>
+        </tr>
+        <tr>
+            <th>
+                <input pInputText type="number" (input)="dt.filter($event.target.value, 'id', 'startsWith')" placeholder="Search by Id" class="p-column-filter">
+            </th>
+            <th>
+                <input pInputText type="text" (input)="dt.filter($event.target.value, 'name', 'startsWith')" placeholder="Search by Name" class="p-column-filter">
+            </th>
+            <th>
+                <input pInputText type="text" (input)="dt.filter($event.target.value, 'company', 'startsWith')" placeholder="Search by Company" class="p-column-filter">
+            </th>
+            <th>
+                <p-multiSelect appendTo="body" [options]="countries" placeholder="All" (onChange)="onCountryChange($event)" styleClass="p-column-filter" optionLabel="name">
+                    <ng-template let-option pTemplate="item">
+                        <div class="p-multiselect-country-option">
+                            <img [alt]="option.label" src="assets/images/flag/flag_placeholder.png" [class]="'flag flag-' + option.value.code" />
+                            <span class="p-ml-1">{{option.label}}</span>
+                        </div>
+                    </ng-template>
+                </p-multiSelect>
+            </th>
+            <th>
+                <p-multiSelect appendTo="body" [options]="representatives" placeholder="All" (onChange)="onRepresentativeChange($event)" styleClass="p-column-filter" optionLabel="name">
+                    <ng-template let-option pTemplate="item">
+                        <div class="p-multiselect-representative-option">
+                            <img [alt]="option.label" src="assets/images/avatar/&#123;&#123;option.value.image&#125;&#125;" />
+                            <span class="p-ml-1">{{option.label}}</span>
+                        </div>
+                    </ng-template>
+                </p-multiSelect>
+            </th>
+            <th>
+                <p-calendar appendTo="body" (onSelect)="onDateChange($event)" (onClearClick)="dt.filter('', 'date', 'equals')" [showButtonBar]="true" styleClass="p-column-filter" placeholder="Registration Date" [readonlyInput]="true" dateFormat="yy-mm-dd"></p-calendar>
+            </th>
+            <th>
+                <p-dropdown appendTo="body" [options]="statuses" (onChange)="dt.filter($event.value, 'status', 'equals')" styleClass="p-column-filter" placeholder="Select a Status" [showClear]="true">
+                    <ng-template let-option pTemplate="item">
+                        <span [class]="'customer-badge status-' + option.value">&#123;&#123;option.label&#125;&#125;</span>
+                    </ng-template>
+                </p-dropdown>
+            </th>
+            <th>
+                <input pInputText type="text" (input)="onActivityChange($event)" placeholder="Minimum" class="p-column-filter">
+            </th>
+            <th></th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-customer let-editing="editing" let-ri="rowIndex">
+        <tr [pEditableRow]="customer" [pSelectableRow]="customer">
+            <td>
+                {{customer?.id}}
+            </td>
+            <td>
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputText type="text" [(ngModel)]="customer.name" required>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{customer?.name}}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td>
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputText type="text" [(ngModel)]="customer.company" required>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{customer?.company}}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td>
+                <img src="assets/images/flag/flag_placeholder.png" [class]="'flag flag-' + customer?.country.code">
+                <span class="image-text">{{customer?.country.name}}</span>
+            </td>
+            <td>
+                <img *ngIf="customer" [alt]="customer?.representative.name" src="assets/images/avatar/{{customer?.representative.image}}" />
+                <span class="image-text">{{customer?.representative.name}}</span>
+            </td>
+            <td>
+                {{customer?.date | date}}
+            </td>
+            <td>
+                <span [class]="'customer-badge status-' + customer?.status">{{customer?.status}}</span>
+            </td>
+            <td>
+                <p-progressBar [value]="customer?.activity" [showValue]="false"></p-progressBar>
+            </td>
+            <td>
+                <button *ngIf=" !editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil" (click)="onRowEditInit(customer)" class="p-button-rounded p-button-text"></button>
+                <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSave(customer)" class="p-button-rounded p-button-text p-button-success p-mr-2"></button>
+                <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(customer, ri)" class="p-button-rounded p-button-text p-button-danger"></button>
+            </td>
+
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="9">
+                <div *ngIf="!loading">No customers found.</div>
+                <div *ngIf="loading">Loading...</div>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
