@@ -1,6 +1,6 @@
-# PrimeNG table examples
+# PrimeNG examples
 
-The project contains a .net core webapi and an angular application with the table examples.
+The project contains a .net core webapi and an angular application with the primeng examples.
 In order to run the example you need dotnet core 3.1 and nodejs installed in your machine.
 
 ## Verions used
